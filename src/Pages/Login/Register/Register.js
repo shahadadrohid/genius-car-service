@@ -1,25 +1,45 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { useNavigate } from 'react-router-dom';
+import { useCreateUserWithEmailAndPassword, useUpdateProfile } from 'react-firebase-hooks/auth';
+import auth from '../../../firebase.init'
+import SocialLogin from '../SocialLogin/SocialLogin';
 
 const Register = () => {
-    const nameRef = useRef('')
-    const emailRef = useRef('')
-    const passwordRef = useRef('')
+    const [agree, setAgree] = useState(false);
+    const [
+        createUserWithEmailAndPassword,
+        user,
+        loading,
+        error,
+    ] = useCreateUserWithEmailAndPassword(auth, { sendEmailVerification: true });
+    const [updateProfile, updating, updateError] = useUpdateProfile(auth);
+
+    const emailRef = useRef('');
+    const passwordRef = useRef('');
+    const nameRef = useRef('');
     const confirmPasswordRef = useRef('')
     const navigate = useNavigate();
 
-    const handleSubmit = event => {
+
+    const navigateLogin = event => {
+        navigate('/login')
+    }
+
+    if (user) {
+        navigate('/')
+    }
+    const handleSubmit = async event => {
         event.preventDefault();
         const email = emailRef.current.value;
         const password = passwordRef.current.value;
         const name = nameRef.current.value;
         const confirmPassword = confirmPasswordRef.current.value;
-        console.log(name, email, password, confirmPassword)
-    }
-    const navigateLogin = event => {
-        navigate('/login')
+        await createUserWithEmailAndPassword(email, password);
+        await updateProfile({ dispalyName: name })
+        alert('Update profile')
+        navigate('/')
     }
     return (
         <div className="w-50 mx-auto border border-2 border-primary p-4 rounded mt-5">
@@ -33,9 +53,6 @@ const Register = () => {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label className="text-start">Email address</Form.Label>
                     <Form.Control ref={emailRef} type="email" placeholder="Enter email" required />
-                    <Form.Text className="text-muted">
-                        We'll never share your email with anyone else.
-                    </Form.Text>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="formBasicPassword">
@@ -46,14 +63,16 @@ const Register = () => {
                     <Form.Label>Confirm Password</Form.Label>
                     <Form.Control ref={confirmPasswordRef} type="password" placeholder="Confirm Password" required />
                 </Form.Group>
-                <Form.Group className="mb-3" controlId="formBasicCheckbox">
-                    <Form.Check type="checkbox" label="Check me out" required />
-                </Form.Group>
-                <Button variant="primary" type="submit">
+
+                <input onClick={() => setAgree(!agree)} type="checkbox" name="terms" id="terms" />
+                <label className={`ps-2 ${agree ? 'text-success' : 'text-danger'}`} htmlFor="terms">Accept Genius Car Terms & Conditions</label>
+
+                <Button disabled={!agree} className="mt-4 border-0 d-block w-75 mx-auto rounded-pill px-5 py-2 text-white" variant="primary" type="submit">
                     Submit
                 </Button>
             </Form>
-            <p>Have an Account? <span className="text-danger" style={{ cursor: 'pointer' }} onClick={navigateLogin}>Login here</span></p>
+            <p className="text-center">Have an Account? <span className="text-danger" style={{ cursor: 'pointer' }} onClick={navigateLogin}>Login here</span></p>
+            <SocialLogin></SocialLogin>
         </div>
     );
 };
