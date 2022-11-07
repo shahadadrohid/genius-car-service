@@ -40,9 +40,18 @@ const Header = () => {
                         </Nav>
                         <Nav>
                             <Nav.Link as={Link} to="/about">About</Nav.Link>
-                            {user ? <button style={{ cursor: 'pointer', borderRadius: '5px' }} onClick={handleSignOut}>Sign Out</button> :
-                                <Nav.Link as={Link} eventKey={2} to="/login">Login
-                                </Nav.Link>
+                            {
+                                user &&
+                                <>
+                                    <Nav.Link as={Link} to="/addservice">Add Service</Nav.Link>
+                                    <Nav.Link as={Link} to="/manage">manage</Nav.Link>
+                                </>
+                            }
+                            {
+                                user ? <button style={{ cursor: 'pointer', borderRadius: '5px' }} onClick={handleSignOut}>Sign Out</button>
+                                    :
+                                    <Nav.Link as={Link} eventKey={2} to="/login">Login
+                                    </Nav.Link>
                             }
                         </Nav>
                     </Navbar.Collapse>
